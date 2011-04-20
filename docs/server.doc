@@ -1,0 +1,3 @@
+1. make a chat-room-like server by erlang, this part is a message server, people can create/join/leave a room, send msg to a specific people, or broadcast to the room's all user where he is.
+
+2. server logic part, in this part, player can cast a logic message to server, maybe change some data, the msg will be send to rabbitMQ , then logic server fetch the message and do something, this server can be python

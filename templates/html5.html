@@ -1,0 +1,25 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="/static/site.css"/>
+	<title>Chat room</title>
+</head>
+<body>
+    <script>
+        alert("hello");
+        if ("WebSocket" in window) {
+            var ws = new WebSocket("ws://127.0.0.1:1234");
+            ws.onopen = function() {
+                // Web Socket is connected. You can send data by send() method.
+                ws.send("hello from the browser");
+            };
+            ws.onmessage = function (evt) {
+                var data = evt.data; alert(data);
+            };
+            ws.onclose = function() {
+                alert("closed");
+            };
+            } else {
+        };
+    </script>
+</body>
+</html>
