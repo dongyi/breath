@@ -1,0 +1,13 @@
+用erlang－otp做的tcp的聊天室
+
+目前还没有完成
+
+
+
+入口：breath_gateway
+
+进入breath_proxy后转发给后面，每次转发的消息中带有包括gen_tcp的pid，用来给客户端发消息
+
+login的请求交给breath_master去处理，breath_master保存了所有的场景id-场景pid的关系, 保存在ets里，可能会跨进程访问
+
+登录之后的请求交给breath_scene（场景服务器）处理.....，每个场景是一个进程，保存所有userid和user_pid
