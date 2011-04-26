@@ -2,16 +2,14 @@
 
 -export([get_parameter/2,get_parameter_int/2]).
 -export([get_template/2]).
-
 -export([bin_to_hexstr/1,hexstr_to_bin/1]).
-
 -export([generate_string/1,generate_hash/0]).
-
 -export([time_interval_str/1]).
-
 -export([unicode_clean/1]).
 -export([str/1]).
 -export([debug/1]).
+
+% 公用模块
 
 get_interval_str(Secs) when Secs =< 60 -> io_lib:format("~p seconds", [trunc(Secs)]);
 get_interval_str(Secs) when Secs =< 3600 -> io_lib:format("~p minutes, ", [trunc(Secs / 60)]) ++ get_interval_str(Secs rem 60);
