@@ -21,6 +21,9 @@
 -record (state, {clients = []}).
 
 
+% 这个进程是场景进程，每个进程保存一个在线uid的列表
+% 对外提供join， leave， broadcast接口
+
 start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
