@@ -1,6 +1,8 @@
 -module (breath_gateway).
 -author ("Dong Yi <juvenpp@gmail.com>").
 
+％ 全局入口，是个简单的socket server
+
 -define (PORT, 54321).
 -define (password, "d0ngy!").
 -export ([start/0]).
