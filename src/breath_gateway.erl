@@ -1,59 +1,72 @@
--module (breath_gateway).
--author ("Dong Yi <juvenpp@gmail.com>").
+-module(breath_gateway).
 
-%全局入口,是个简单的socket server
+-export([listen/4, accept/1, recv/3, send/2, close/1, port/1, peername/1,
+         setopts/2]).
 
--define (PORT, 54321).
--define (password, "d0ngy!").
--export ([start/0]).
+-define(ACCEPT_TIMEOUT, 2000).
 
-
-start() ->
-    case gen_tcp:listen(?PORT, [binary, {packet, 0}]) of
-        {ok, Listen} -> 
-            io:format("listen on ~p~n", [?PORT]),
-            spawn(fun () -> parse_connect(Listen) end);
-        {error, Reason} -> exit({?PORT, Reason})
-    end.
-    
-parse_connect(Listen) ->
-    case gen_tcp:accept(Listen) of 
-        {ok, Socket} ->
-            io:format("accept socket ~n"),
-            loop(Socket);
-        {error, Reason} -> exit({accept, Reason})
-    end.
-    
-loop(Socket) ->
-    receive
-        {tcp, Socket, Data} ->
-            io:format("coming pack ~p~n", [binary_to_list(Data)]),
-            case rfc4627:decode(binary_to_list(Data)) of 
-                {ok, D, _Remainder} ->
-                    io:format("data:~p~n", [D]),
-                    {obj, [{"password", Password}, {"body", Body}]} = D,
-                    if
-                        Password /= ?password ->
-                            gen_tcp:send(Socket, <<"bad password">>),
-                            loop(Socket)
-                    end,
-                    %交给下一步处理
-                    Response = spawn_link(fun() -> respond(Socket) end),
-                    breath_proxy:proxy(Body, Response),
-                    loop(Socket); 
-                {error, Reason} ->
-                    io:format("bad ~p~n", [Reason]),
-                    exit({?PORT, Reason})
+listen(Ssl, Port, Opts, SslOpts) ->
+    case Ssl of
+        true ->
+            case ssl:listen(Port, Opts ++ SslOpts) of
+                {ok, ListenSocket} ->
+                    {ok, {ssl, ListenSocket}};
+                {error, _} = Err ->
+                    Err
             end;
-        {tcp_closed, Socket} ->
-            io:format("I'm closing ~n"),
-            ok;
-        _ ->
-            io:format("i don't understand"),
-            loop(Socket)
+        false ->
+            gen_tcp:listen(Port, Opts)
     end.
 
-respond(Socket) ->
-  receive
-    {ok, Msg} -> gen_tcp:send(Socket, [ok, Msg])
-  end.
+accept({ssl, ListenSocket}) ->
+    try ssl:transport_accept(ListenSocket) of
+        {ok, Socket} ->
+            case ssl:ssl_accept(Socket) of
+                ok ->
+                    {ok, {ssl, Socket}};
+                {error, _} = Err ->
+                    Err
+            end;
+        {error, _} = Err ->
+            Err
+    catch
+        error:{badmatch, {error, Reason}} ->
+            {error, Reason}
+    end;
+accept(ListenSocket) ->
+    gen_tcp:accept(ListenSocket, ?ACCEPT_TIMEOUT).
+
+recv({ssl, Socket}, Length, Timeout) ->
+    ssl:recv(Socket, Length, Timeout);
+recv(Socket, Length, Timeout) ->
+    gen_tcp:recv(Socket, Length, Timeout).
+
+send({ssl, Socket}, Data) ->
+    ssl:send(Socket, Data);
+send(Socket, Data) ->
+    gen_tcp:send(Socket, Data).
+
+close({ssl, Socket}) ->
+    ssl:close(Socket);
+close(Socket) ->
+    gen_tcp:close(Socket).
+
+port({ssl, Socket}) ->
+    case ssl:sockname(Socket) of
+        {ok, {_, Port}} ->
+            {ok, Port};
+        {error, _} = Err ->
+            Err
+    end;
+port(Socket) ->
+    inet:port(Socket).
+
+peername({ssl, Socket}) ->
+    ssl:peername(Socket);
+peername(Socket) ->
+    inet:peername(Socket).
+
+setopts({ssl, Socket}, Opts) ->
+    ssl:setopts(Socket, Opts);
+setopts(Socket, Opts) ->
+    inet:setopts(Socket, Opts).

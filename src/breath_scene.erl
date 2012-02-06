@@ -4,18 +4,13 @@
 -behaviour (gen_server).
 
 -export ([start_link/0]).
-
 -export ([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
-
 -export ([login/2, leave/2, broadcast/2, get_scene_list/1]).
 
 -define (MAX_IDLE_TIME, 160).
-
 -define (RATE_MSG_INTERVAL, 3).
 -define (RATE_MSG_COUNT, 10).
-
 -define (MAX_CONNECTIONS, 3).
-
 -define (ADMIN_PASSWORD, "dongyi").
 
 -record (state, {clients = []}).
@@ -29,12 +24,18 @@ start_link() -> gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 
 breath_scene:broadcast(Userid, Scenepid, Msg) -> gen_server:call(?MODULE, {broadcast, {Scenepid, Msg}}, infinity).
-breath_scene:leave(Userid, Scenepid, Msg) -> gen_server:call(?MODULE, {}).
-breath_scene:join(Userid, Sceneid) -> gen_server:call(?MODULE, {})  %返回一个pid
+breath_scene:leave(Userid, Scenepid) -> gen_server:call(?MODULE, {}).
+breath_scene:join(Userid, Scenepid) -> gen_server:call(?MODULE, {})  %返回一个pid
 
 
-handle_call({broadcast, {Scenepid, Msg}}) ->
+handle_call({broadcast, {Userid, Scenepid, Msg}}) ->
     ok.
     
-    
-    
+handle_call({leave, {Userid, Scenepid}) ->
+    broadcast(Userid, Scenepid, <<Userid ++ "is leave">>),
+    ok.
+
+handle_call({join, {Userid, Scenepid}) ->
+    broadcast(Userid, Scenepid, <<Userid ++ "come in">>),
+    ok.
+

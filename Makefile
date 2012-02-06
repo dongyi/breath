@@ -1,13 +1,43 @@
-ERL=erl
-EBIN=./ebin
+.PHONY: all clean test test-fast docs build_plt analyze update \
+    erlang test_erlang test_erlang_fast clean_erlang docs_erlang \
 
-all: 
-	mkdir -p ${EBIN}
-	cp lib/*/*.beam ebin
-	cd src && make
+REBAR?=./rebar
 
-erl_chat: all
-	${ERL} -smp auto +A 64 +K true  -env ERL_MAX_ETS_TABLES 20000 -boot start_sasl -run chat_server startapp -pa ebin
+all: erlang
 
-clean:
-	rm -rf ${EBIN}/*.beam
+clean: clean_erlang
+
+test: test_erlang
+
+test-fast: test_erlang_fast
+
+update: update_erlang
+
+docs: docs_erlang
+
+erlang:
+	@$(REBAR) get-deps
+	@$(REBAR) compile
+
+update_erlang:
+	@$(REBAR) update-deps
+
+compile_erlang:
+	@$(REBAR) compile
+
+test_erlang: erlang
+	@rm -rf .eunit # Do not like: #14639
+	@mkdir -p .eunit
+	@$(REBAR) skip_deps=true eunit
+
+test_erlang_fast: compile_erlang
+	@$(REBAR) skip_deps=true eunit
+
+clean_erlang:
+	@$(REBAR) delete-deps
+	@$(REBAR) clean
+	@rm -rf .eunit
+	@rm -rf doc
+
+docs_erlang:
+	@$(REBAR) skip_deps=true doc

@@ -1,16 +1,9 @@
-%% @author Bob Ippolito <bob@mochimedia.com>
-%% @copyright 2007 Mochi Media, Inc.
+-module(breath_sup).
 
--module (breath_sup).
--author ("Dong Yi <juvenpp@gmail.com>").
-
--behaviour (supervisor).
-
+-behaviour(supervisor).
 
 %% External exports
--export ([start_link/0, upgrade/0]).
-
-
+-export([start_link/0]).
 
 %% supervisor callbacks
 -export([init/1]).
@@ -20,34 +13,21 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-%% @spec upgrade() -> ok
-%% @doc Add processes if necessary.
-upgrade() ->
-    mochisup:upgrade(?MODULE).
-
 %% @spec init([]) -> SupervisorTree
-%%      returns the supervisor tree.
+%% @doc supervisor callback.
 init([]) ->
-    SocketConfig = [{ip, 'localhost'},
-		    {port, 8911}],
-    Gateway = {breath_gateway,
-             {breath_gateway, start, [SocketConfig]},
-	         permanent, 5000, worker, dynamic},
-    Proxy =  {breath_proxy,
-             {breath_proxy, start_link, []},
-             permanent, 5000, worker, [breath_proxy]},
-    Scene =   {breath_scene,
-             {breath_scene, start_link, []},
-             permanent, 5000, worker, [breath_scene]},
-    Util  =  {breath_util,
-             {breath_util, start_link, []},
-             permanent, 5000, worker, dynamic},
-    Master = {breath_master,
-            {breath_master, start_link, []},
-            permanent, 5000, worker, [breath_master]},
-    Stat = {breath_stat,
-            {breath_stat, start_link, []},
-            permanent, 5000, worker, [breath_stat]},
+    Controller = controller_specs(),
 
-    Processes = [Gateway, Proxy, Proxy, Scene, Util, Master, Stat],
+    BreathConfig = [{ip, "0.0.0.0"}, {port, 2223}],
+    Breath = {breath_server,
+           {breath_mod, start, [BreathConfig]},
+            permanent, 5000, worker, dynamic},
+    Processes = [Breath, Controller],
+    io:format("Processes:~p~n", [Processes]),
     {ok, {{one_for_one, 10, 10}, lists:flatten(Processes)}}.
+
+controller_specs() ->
+    child_spec(breath_proxy).
+     
+child_spec(Module) ->
+    Module:child_spec().
