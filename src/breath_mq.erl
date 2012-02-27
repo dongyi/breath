@@ -43,7 +43,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 handle_call(_Req, _From, State) ->
-    {noreply, State}.
+    {noreply, ok, State}.
 
 handle_info(_Req, State) ->
     {noreply, State}.
