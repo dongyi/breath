@@ -37,7 +37,7 @@ terminate(_Reason, State) ->
 handle_cast({send, Msg}, #state{socket=Socket}=State) ->
     io:format('test---in handle cast ~n'),
     erlzmq:send(Socket, Msg),
-    {ok, State}.
+    {noreply, State}.
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
