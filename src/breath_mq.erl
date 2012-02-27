@@ -15,7 +15,7 @@ child_spec() ->
     {?MODULE, {?MODULE, start_link, []},
      permanent, 5000, worker, [?MODULE]}.
 
-%% @spec start_link() -> {ok, pid()}
+%% @spec start_link() -> {ok, state}
 %%
 %% @doc
 start_link() ->
