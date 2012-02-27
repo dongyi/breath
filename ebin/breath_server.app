@@ -3,7 +3,7 @@
               {vsn,"0.01"},
               {modules,[breath_app,breath_deps,breath_gateway,breath_mod,
                         breath_mq,breath_postoffice,breath_proxy,breath_room,
-                        breath_server,breath_sup,chat_web]},
+                        breath_server,breath_sup,chat_web,test]},
               {registered,[]},
               {mod,{breath_app,[]}},
               {env,[]},

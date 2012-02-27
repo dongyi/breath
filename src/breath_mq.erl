@@ -34,9 +34,10 @@ init([]) ->
 terminate(_Reason, State) ->
     ok = erlzmq:close(State#state.socket).
 
-handle_cast({send, Msg}, #state{socket=Socket}) ->
-    io:format('test~n'),
-    ok = erlzmq:send(Socket, Msg, []).
+handle_cast({send, Msg}, #state{socket=Socket}=State) ->
+    io:format('test---in handle cast ~n'),
+    erlzmq:send(Socket, Msg),
+    {ok, State}.
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
