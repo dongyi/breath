@@ -1,0 +1,9 @@
+{application, breath_server,
+ [{description, "this is simple chat server."},
+  {vsn, "0.01"},
+  {modules, [
+  ]},
+  {registered, []},
+  {mod, {breath_app, []}},
+  {env, []},
+  {applications, [kernel, stdlib, crypto]}]}.

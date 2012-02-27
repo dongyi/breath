@@ -1,2 +1,0 @@
--module (breath_stat).
--author ("Dong Yi <juvenpp@gmail.com>").

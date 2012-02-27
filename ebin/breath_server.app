@@ -1,0 +1,10 @@
+{application,breath_server,
+             [{description,"this is simple chat server."},
+              {vsn,"0.01"},
+              {modules,[breath_app,breath_deps,breath_gateway,breath_mod,
+                        breath_mq,breath_postoffice,breath_proxy,breath_room,
+                        breath_server,breath_sup,chat_web]},
+              {registered,[]},
+              {mod,{breath_app,[]}},
+              {env,[]},
+              {applications,[kernel,stdlib,crypto]}]}.

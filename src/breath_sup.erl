@@ -27,7 +27,8 @@ init([]) ->
     {ok, {{one_for_one, 10, 10}, lists:flatten(Processes)}}.
 
 controller_specs() ->
-    child_spec(breath_proxy).
-     
+    child_spec(breath_proxy),
+    child_spec(breath_mq).
+
 child_spec(Module) ->
     Module:child_spec().

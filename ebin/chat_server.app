@@ -1,0 +1,11 @@
+{application,chat_server,
+             [{description,"this is simple chat server."},
+              {vsn,"0.01"},
+              {modules,[chat_deps,chat_group_controller,chat_mm_controller,
+                        chat_server,chat_server_app,chat_server_mod,
+                        chat_server_sup,chat_socket,chat_socket_server,
+                        chat_web]},
+              {registered,[]},
+              {mod,{chat_server_app,[]}},
+              {env,[]},
+              {applications,[kernel,stdlib,crypto]}]}.
