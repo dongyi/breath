@@ -17,12 +17,13 @@ start_link() ->
 %% @doc supervisor callback.
 init([]) ->
     Controller = controller_specs(),
-
     BreathConfig = [{ip, "0.0.0.0"}, {port, 2223}],
+    MqConfig = [{ip, "127.0.0.1"}, {port, 2224}],
     Breath = {breath_server,
            {breath_mod, start, [BreathConfig]},
             permanent, 5000, worker, dynamic},
-     Mq = {breath_mq, {breath_mq, start_link, []}, permanent, 5000, worker, dynamic},
+     Mq = {breath_mq, {breath_mq, start_link, [MqConfig]},
+            permanent, 5000, worker, dynamic},
      Processes = [Breath, Mq, Controller],
     io:format("Processes:~p~n", [Processes]),
     {ok, {{one_for_one, 10, 10}, lists:flatten(Processes)}}.

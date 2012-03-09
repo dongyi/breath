@@ -22,13 +22,13 @@ handle_call(get_all_users, _From, #state{users = Users} = State) ->
 handle_call({login, Pid, Nick}, _From, #state{users = Users} = State) ->
     NewState = case orddict:is_key(Pid, Users) of
                    true ->
-                       broadcast(Nick, Pid, "I'm joining the group", Users),
+                       broadcast(Nick, Pid, "connected", Users),
                        Pid ! {setController, self()},
                        State;
                    false ->
                        Users0 = orddict:store(Pid, Nick, Users),
                        io:format("pid:~p~n", [Pid]),
-                       broadcast(Nick, Pid, "I'm joining the group", Users0),
+                       broadcast(Nick, Pid, "connected", Users0),
                        Pid ! {setController, self()},
                        State#state{users = Users0}
                end,
@@ -43,7 +43,7 @@ handle_call(Req, _From, State) ->
 handle_cast({_, Pid}, #state{users = Users} = State) ->
     Nick = orddict:fetch(Pid, Users),
     NewUsers = remove_user(Pid, Users),
-    broadcast(Nick, Pid, "I'm leaving the group", NewUsers),
+    broadcast(Nick, Pid, "connection closed", NewUsers),
     {noreply, State#state{users = NewUsers}};
 handle_cast(_Req, State) ->
     {noreply, State}.
@@ -75,7 +75,7 @@ broadcast(Nick, Pid, Msg, Users) ->
         [Content] ->
             case string:tokens(Content, "@") of
                 [Mq_header, Mq_body] ->
-                    io:format("!!!!!! mq !!!!!! ~p ~p~n", [Mq_header, Mq_body]);
+                    breath_mq:send_msg(Mq_header++"@"++Mq_body);
                 [Mq_body] ->
                     F = fun(User) ->
                         %%io:format("Broadcasting ~p to ~p", [Msg, User]),
@@ -88,10 +88,10 @@ broadcast(Nick, Pid, Msg, Users) ->
 send(Nick, Pid, Msg, To) when is_pid(To); is_atom(To) ->
     To ! {send, {msg, Nick, Pid, Msg}}.
 
-remove_user(P, [{P,N}|T]) -> io:format("~p removed~n",[N]), T;
-remove_user(P, [H|T])     -> [H|remove_user(P, T)];
+remove_user(_P, [{_P, _N} | _T]) -> _T;
+remove_user(_P, [_H | _T])     -> [_H | remove_user(_P, _T)];
 remove_user(_, [])        -> [].
 
-is_in_list(N, [{P,N}|T]) -> P;
-is_in_list(N, [{P,_}|T]) -> is_in_list(N, T);
-is_in_list(N, []) -> false.
+is_in_list(_N, [{_P, _N} | _T]) -> _P;
+is_in_list(_N, [{_P, _} | _T]) -> is_in_list(_N, _T);
+is_in_list(_N, []) -> false.
