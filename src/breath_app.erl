@@ -6,6 +6,7 @@
 %% @spec start(_Type, _StartArgs) -> ServerRet
 %% @doc application start callback for breath server.
 start(_Type, _StartArgs) ->
+    breath_deps:ensure(),
     breath_sup:start_link().
 
 %% @spec stop(_State) -> ServerRet

@@ -73,11 +73,16 @@ broadcast(Nick, Pid, Msg, Users) ->
                     send(Nick, Pid, Content, User)
             end;
         [Content] ->
-            F = fun(User) ->
-                %%io:format("Broadcasting ~p to ~p", [Msg, User]),
-                send(Nick, Pid, Content, User)
-            end,
-            lists:foreach(F, orddict:fetch_keys(Users))
+            case string:tokens(Content, "@") of
+                [Mq_header, Mq_body] ->
+                    io:format("!!!!!! mq !!!!!! ~p ~p~n", [Mq_header, Mq_body]);
+                [Mq_body] ->
+                    F = fun(User) ->
+                        %%io:format("Broadcasting ~p to ~p", [Msg, User]),
+                        send(Nick, Pid, Mq_body, User)
+                    end,
+                    lists:foreach(F, orddict:fetch_keys(Users))
+            end
     end.
 
 send(Nick, Pid, Msg, To) when is_pid(To); is_atom(To) ->

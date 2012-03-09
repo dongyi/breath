@@ -25,7 +25,7 @@ send_msg(Msg) ->
     gen_server:cast(?MODULE, {send, Msg}).
 
 init([]) ->
-    process_flag(trap_exit, true),
+   %process_flag(trap_exit, true),
    {ok, Context} = erlzmq:context(),
    {ok, Socket} = erlzmq:socket(Context, [pub, {active, false}]),
    ok = erlzmq:bind(Socket, "tcp://127.0.0.1:5858"),
